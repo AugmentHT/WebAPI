@@ -18,7 +18,7 @@ public class careOpportunityReceive {
     }
 
     public SqlRowSet getUnprocessedCO(){
-      SqlRowSet rs = dao.fetch("select * from ocean.careopportunityreceiveddata where status=1");
+      SqlRowSet rs = dao.fetch("select * from ocean.careopportunityreceiveddata where Parameter8=1");
         return rs;
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.glassfish.jersey.client.ClientConfig;
 
+import javax.swing.text.html.Option;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -13,6 +14,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.FileInputStream;
 import java.net.URI;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Properties;
 
 /**Class to get data from external api
@@ -39,6 +42,9 @@ public class Querier {
     private final Client tclient = ClientBuilder.newClient(tconfig);
     private final WebTarget ttarget = tclient.target(testuri);
 
+    public Querier() {
+        this.setProps();
+    }
 
     private void setProps(){
         try {
@@ -150,6 +156,32 @@ public class Querier {
         Response response = this.doRequest("GetProvider", ehrUsername, appname, "", token, providerID, "", "", "", "", "", null);
         return response.readEntity(String.class);
     }
+
+    public String saveTask(String token, String PatientID,String taskType, String TargetUser, String workObjectID,String subjectInfo,String XMLParams, String attachmentFormat, byte[] data){
+        //do remap
+        JsonObject jo = new JsonObject( );
+        jo.addProperty("Action", "SaveTask");
+        jo.addProperty("AppUserID", ehrUsername);
+        jo.addProperty("Appname", appname);
+        jo.addProperty("Token", token);
+        jo.addProperty("PatientID", PatientID==null?"":PatientID);
+        jo.addProperty("Parameter1", taskType);
+        jo.addProperty("Parameter2", TargetUser);
+        jo.addProperty("Parameter3", workObjectID==null?"":workObjectID);
+        jo.addProperty("Parameter4", subjectInfo==null?"":subjectInfo);
+        jo.addProperty("Parameter5", XMLParams==null?"":XMLParams);
+        jo.addProperty("Parameter6", attachmentFormat==null?"":attachmentFormat);
+        jo.addProperty("Data", data==null?gson.toJson(data):"");
+        try {
+            Response response = target.path("/Unity/UnityService.svc/json/MagicJson").request().post(Entity.entity(jo.toString(), MediaType.APPLICATION_JSON));
+            // Response response = target.request().post(Entity.entity(jo.toString(), MediaType.APPLICATION_JSON));
+            return response.readEntity(String.class);
+        }catch (Exception e){
+            return null;  // make it a null or error response
+        }
+
+    }
+
 
 
     public Response test(String token){
