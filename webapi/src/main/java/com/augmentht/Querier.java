@@ -182,6 +182,11 @@ public class Querier {
 
     }
 
+    public String getTaskbyID(String token,String taskID){
+        Response response = this.doRequest("GetTask",ehrUsername,appname,"",token,taskID,"","","","","",null);
+        return response.readEntity(String.class);
+
+    }
 
 
     public Response test(String token){
