@@ -49,17 +49,18 @@ public class Workflow1 {
         wf.go();
     }
 
-    public void go() {
+    public String go() {
+        StringBuffer chatter = new StringBuffer(5000);
         // Read care opportunity table
         SqlRowSet incoming = cotable.getUnprocessedCO();
 
         //get token for operation
-        System.out.println("Fetching token for Pro Latest...");
+        chatter.append("Fetching token for Pro Latest...");
         String token = ehr.getToken();
-        System.out.println("Fetched token :"+token);
-        System.out.println("Authenticating user...");
+        chatter.append("Fetched token :"+token);
+        chatter.append("Authenticating user...");
         ehr.userAuth(token);
-        System.out.println("Authenticated.");
+        chatter.append("Authenticated.");
 //loop here for each row in sql
         while (incoming.next()) {
 
@@ -93,9 +94,9 @@ public class Workflow1 {
                 String ModifiedDate = CreatedDate;
                 int ModifiedBy = CreatedBy;
                 // so now can save to patient table
-                System.out.println("Saving patient "+PatientFirstName+PatientLastName+" to table...");
+                chatter.append("Saving patient "+PatientFirstName+PatientLastName+" to table...");
                 ptable.execute("insert into ocean.patient values('" + PatientID + "','" + PatientFirstName + "','" + PatientMiddleName + "','" + PatientLastName + "','" + PatientSuffix + "','" + COPatientId + "','" + EHRPatientId + "','" + PatientEMPI + "','" + PatientSSN + "','" + CreatedDate + "','" + CreatedBy + "','" + ModifiedDate + "','" + ModifiedBy + "')");
-                System.out.println("Patient record stored");
+                chatter.append("Patient record stored");
                 //Get all fields and send to
             /*Incoming -"Nickname": "","Language": "English","HomeEmail": "test@email.com","trainingPat": "N",
       "activePat": "Y","PhysLastName": "Manning","PhoneNumber": "9195557855","age": "41y","middlename": "S",
@@ -129,10 +130,10 @@ Destination format - PatientId, PatientFirstName, PatientMiddleName, PatientLast
                 CreatedBy = 47;
                 ModifiedDate = CreatedDate;
                 ModifiedBy = CreatedBy;
-                System.out.println("Saving patient address to table..");
+                chatter.append("Saving patient address to table..");
                 //Now save to addresstable.
                 atable.execute("insert into ocean.address values ('" + "47" + "','" + Address1 + "','" + Address2 + "','" + Address3 + "','" + AddressName + "','" + City + "','" + State + "','" + ZipCode + "','" + AddressType + "','" + Verified + "','" + CreatedDate + "','" + CreatedBy + "','" + ModifiedDate + "','" + ModifiedBy + "')");
-                System.out.println("Patient address stored.");
+                chatter.append("Patient address stored.");
             /*
             Outogoing data:AddressId, Address1, Address2, Address3, AddressName, City, State, ZipCode, AddressType, Verified, CreatedDate, CreatedBy, ModifiedDate, ModifiedBy*/
 
@@ -141,7 +142,7 @@ Destination format - PatientId, PatientFirstName, PatientMiddleName, PatientLast
 
 
             } else {
-                System.out.println("probably have to search and stuff");
+                chatter.append("probably have to search and stuff");
             }
 
 
@@ -166,10 +167,10 @@ Destination format - PatientId, PatientFirstName, PatientMiddleName, PatientLast
             int CreatedBy = 42;
             String ModifiedDate = CreatedDate;
             int ModifiedBy = CreatedBy;
-            System.out.println("Saving provider to table...");
+            chatter.append("Saving provider to table...");
             proTable.execute("insert into ocean.provider values ('" + ProviderId + "','" + ProviderFirstName + "','" + ProviderMiddleName + "','" + ProviderLastName + "','" + ClientID + "','" + ProviderNPI + "','" + CreatedDate + "','" + CreatedBy + "','" + ModifiedDate + "','" + ModifiedBy + "');");
 //Load provider data into provider and adress table
-            System.out.println("Provider "+ProviderFirstName+ProviderLastName+" saved.");
+            chatter.append("Provider "+ProviderFirstName+ProviderLastName+" saved.");
             /*                       Typical response:
 
             {
@@ -216,9 +217,9 @@ Destination format - PatientId, PatientFirstName, PatientMiddleName, PatientLast
 /*Columns of sendqueue table
 CareOpportunityDataSendQueueId, ClientId, COPatientId, COProviderId, EHRPatientId, EHRProviderId, CareOpportunityDescription, COAttachmentTypeID, COAttachmentDescription, COAttachment, Parameter1, Parameter2, Parameter3, Parameter4, Parameter5, Parameter6, Parameter7, Parameter8, CreatedDate, CreatedBy, ModifiedDate, ModifiedBy
  */
-            System.out.println("Saving to Datasendtable...");
+            chatter.append("Saving to Datasendtable...");
             codatasendtable.execute("insert into ocean.careopportunitydatasendqueue values('" + "1" + "','" + ClientID + "','" + PatientID + "','" + ClientID + "','" + PatientID + "','" + ClientID + "','" + incoming.getString("CareOpportunityDescription") + "','" + incoming.getString("COAttachmentTypeID") + "','" + incoming.getString("COAttachmentDescription") + "','" + incoming.getString("COAttachment") + "','" + incoming.getString("Parameter1") + "','" + incoming.getString("Parameter2") + "','" + incoming.getString("Parameter3") + "','" + incoming.getString("Parameter4") + "','" + incoming.getString("Parameter5") + "','" + incoming.getString("Parameter6") + "','" + incoming.getString("Parameter7") + "','" + incoming.getString("Parameter8") + "','" + CreatedDate + "','" + CreatedBy + "','" + ModifiedDate + "','" + ModifiedBy + "')");
-            System.out.println("Saved to datasendtable successfully.");
+            chatter.append("Saved to datasendtable successfully.");
 
             //Savetask
 /*
@@ -239,17 +240,18 @@ Param 5 = (Optional) Info = XML extra info<taskdata>
 return 2 object json -status(always 0) TaskID
 
  */
-            System.out.println("Sending task to EHR...");
+            chatter.append("Sending task to EHR...");
             String actionReport = ehr.saveTask(token, PatientID, incoming.getString("Parameter1"), ClientID, incoming.getString("Parameter2"), incoming.getString("CareOpportunityDescription"), incoming.getString("Parameter3"), incoming.getString("COAttachmentTypeID"), incoming.getString("COAttachment").getBytes());
-            System.out.println("Task report successfully sent.");
-            //System.out.println(actionReport);
+            chatter.append("Task report successfully sent.");
+            //chatter.append(actionReport);
             actionReport = actionReport.substring(1, actionReport.length() - 1);
+            System.out.println(actionReport);
             JsonObject taskReturn = parser.parse(actionReport).getAsJsonObject();
             JsonObject taskret = taskReturn.get("savetaskinfo").getAsJsonArray().get(0).getAsJsonObject();
             String taskID = taskret.get("TaskId").getAsString();
-            System.out.println("Task was stored with TaskId:" + taskID);
+            chatter.append("Task was stored with TaskId:" + taskID);
             String task = ehr.getTaskbyID(token, taskID);
-            System.out.println("Retrieved task was :" + task);
+            chatter.append("Retrieved task was :" + task);
 
 
             //Load CO data after remapping parameters into //remap from ehrparametermapping CODatasendqueue table
@@ -257,6 +259,8 @@ return 2 object json -status(always 0) TaskID
 
             //remap to api required format,Hit ehr api, send the CO data with attachments
 
+
         }
+    return chatter.toString();
     }
 }

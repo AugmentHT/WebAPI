@@ -1,8 +1,6 @@
 package com.augmentht;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.awt.*;
 
@@ -10,16 +8,19 @@ import java.awt.*;
  *
  * Created by dkochar on 5/20/2017.
  */
-@Path("/test")
+@Path("/")
 public class endpoints {
 
 
+    @Path("/workflowdemo")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String hello(){
-        return "Hello this is jersey speaking";
+    public String executeWorkflow(){
+        return new Workflow1().go();
     }
 
-
-
+    @Path("/test")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public String formtest(@FormParam("proID") String providerID){return "received-"+providerID;}
 }
